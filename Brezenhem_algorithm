@@ -1,0 +1,67 @@
+<HTML lang="en">
+<BODY>
+<canvas id="lab03" width="500" height="400" style="border: 1px solid">
+</canvas>
+<script>
+    function Line(idata, x0, y0, x1, y1) {
+        var eps = 0;
+        var n = 1;
+        var y_sign = (y1 - y0) / Math.abs(y1 - y0),
+            x_sign = (x1 - x0) / Math.abs(x1 - x0);
+        if (Math.abs((y1 - y0) / (x1 - x0)) <= 1) {
+            var y = y0;
+            var k = 2 * Math.abs(y1 - y0);
+            for (var x = x0; x !== x1; x += x_sign) {
+                idata.data[(x + y * idata.width) * 4 + 3]=255 *
+                    Math.pow(Math.abs(0.5 - (eps / (2 * (x1 - x0)))), n);
+                idata.data[(x + (y + y_sign * x_sign) * idata.width) * 4 + 3]=255 *
+                    Math.pow(Math.abs(0.5 + (eps / (2 * (x1 - x0))) ), n);
+                eps = eps + k;
+                if (eps > Math.abs(x1 - x0)) {
+                    y += y_sign;
+                    eps = eps - 2 * Math.abs(x1 - x0);
+                }
+            }
+        } 
+        else {
+            var x = x0;
+            var k = 2 * Math.abs(x1 - x0);
+            for (var y = y0; y !== y1; y += y_sign) {
+                idata.data[(x + y * idata.width) * 4 + 3]=255 *
+                    Math.pow(Math.abs(0.5 - (eps / (2 * (y1 - y0)))), n);
+                idata.data[(x + x_sign * y_sign + y * idata.width) * 4 + 3]=255 *
+                    Math.pow(Math.abs(0.5 + (eps / (2 * (y1 - y0)))), n);
+                eps = eps + k;
+                if (eps > Math.abs(y1 - y0)) {
+                    x += x_sign;
+                    eps = eps - 2 * Math.abs(y1 - y0);
+                }
+            }
+        }
+
+    }
+</script>
+<script>
+    var canvas = document.getElementById("lab03");
+    var ctx = canvas.getContext("2d");
+
+    var flag = 0;
+    var idata = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    console.log(idata);
+    canvas.addEventListener("click", function(event){
+        if (!flag) {
+            x0 = event.offsetX;
+            y0 = event.offsetY;
+            flag = 1;
+        } else {
+            x1 = event.offsetX;
+            y1 = event.offsetY;
+            Line(idata, x0, y0, x1, y1);
+            ctx.putImageData(idata, 0, 0);
+            flag = 0;
+        }
+    });
+
+</script>
+</BODY>
+</HTML>
